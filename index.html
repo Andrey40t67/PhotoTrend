@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генерация изображений с помощью Kandinsky AI</title>
+</head>
+<body>
+    <h1>Генерация изображений с использованием Kandinsky AI</h1>
+
+    <textarea id="prompt" placeholder="Введите описание изображения..." rows="4" cols="50"></textarea><br>
+    <button onclick="generateImage()">Создать изображение</button>
+
+    <h2>Результат:</h2>
+    <div id="result">
+        <!-- Сюда будет вставляться сгенерированное изображение -->
+    </div>
+
+    <script>
+        async function generateImage() {
+            const prompt = document.getElementById("prompt").value;
+
+            // Подготовка данных для отправки
+            const requestData = {
+                "type": "GENERATE",
+                "numImages": 1,
+                "width": 1024,
+                "height": 1024,
+                "generateParams": {
+                    "query": prompt
+                }
+            };
+
+            const apiKey = 'CC2DC7985D50BEC6E5C4C676C2913AEA';  // Ваш API-ключ
+            const secretKey = 'B9A94C5A354853111C5B043E721B13F5';  // Ваш Secret-ключ
+
+            const headers = {
+                'X-Key': `Key ${apiKey}`,
+                'X-Secret': `Secret ${secretKey}`,
+                'Content-Type': 'application/json'
+            };
+
+            try {
+                // Отправляем POST запрос на генерацию изображения
+                let response = await fetch('https://api-key.fusionbrain.ai/key/api/v1/text2image/run', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestData)
+                });
+
+                const responseData = await response.json();
+
+                if (responseData.status === 'DONE') {
+                    const imageUrl = responseData.images[0];
+                    const imageElement = document.createElement('img');
+                    imageElement.src = `data:image/png;base64,${imageUrl}`;
+                    document.getElementById('result').innerHTML = '';  // Очищаем старые изображения
+                    document.getElementById('result').appendChild(imageElement);
+                } else {
+                    alert('Ошибка генерации изображения, попробуйте снова!');
+                }
+            } catch (error) {
+                console.error('Ошибка запроса:', error);
+                alert('Произошла ошибка при отправке запроса!');
+            }
+        }
+    </script>
+</body>
+</html>
